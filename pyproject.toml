@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "charm-runner"
+version = "0.1.0"
+description = ""
+authors = ["Roman <roman-right@protonmail.com>"]
+readme = "README.md"
+packages = [{ include = "charm_runner" }]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+charm_runner = "charm_runner.app:App.run"
+
+[tool.black]
+line-length = 79
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
