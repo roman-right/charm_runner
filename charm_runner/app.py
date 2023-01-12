@@ -60,8 +60,9 @@ class App:
         self.listbox.grid(column=0, row=0, columnspan=1)
         self.update_listbox()
 
-        self.listbox.bind("<Delete>", self.delete_from_db)
-        self.listbox.bind("<Return>", self.run_in_pycharm)
+        self.main.bind("<Delete>", self.delete_from_db)
+        self.main.bind("<Escape>", lambda e: self.main.destroy())
+        self.main.bind("<Return>", self.run_in_pycharm)
 
     def update_listbox(self):
         self.projects = {}
@@ -99,6 +100,8 @@ class App:
             bg=Colors.bg_button,
             foreground=Colors.fg_button,
             highlightbackground=Colors.bg_default,
+            activebackground=Colors.selected,
+            activeforeground=Colors.bg_default,
             bd=0,
             width=10,
             font=("Roboto", 16),
