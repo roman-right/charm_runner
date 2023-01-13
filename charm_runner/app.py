@@ -1,6 +1,7 @@
 import datetime
 import subprocess
 import tkinter
+import venv
 from enum import Enum
 from pathlib import Path
 from tkinter import filedialog, EXTENDED
@@ -91,8 +92,8 @@ class App:
         )
         self.button_frame.grid(column=1, row=0, sticky=tkinter.N)
         self.buttons = []
-        self.create_button("Add project", self.add_project)
-        self.create_button("Create project", self.create_project)
+        self.create_button("Add", self.add_project)
+        self.create_button("Create", self.create_project)
         self.create_button("Delete", self.delete_from_db)
         self.create_button("Run", self.run_in_pycharm)
         self.create_button("Exit", self.main.destroy)
@@ -147,13 +148,14 @@ class App:
         if isinstance(directory, str):
             dir_path = Path(directory)
             project_name = dir_path.name
-            output_dir = str(dir_path.parent.absolute())
+            output_dir = dir_path.parent.absolute()
             cookiecutter(
                 "https://github.com/roman-right/py-template",
                 no_input=True,
-                output_dir=output_dir,
+                output_dir=str(output_dir),
                 extra_context={"project_name": project_name},
             )
+            venv.create(dir_path.absolute() / "venv", with_pip=True)
             project = Project(
                 name=project_name,
                 path=directory,
