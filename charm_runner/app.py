@@ -2,8 +2,11 @@ import datetime
 import subprocess
 import tkinter
 from enum import Enum
+from pathlib import Path
 from tkinter import filedialog, EXTENDED
 from typing import Callable, List
+
+from cookiecutter.main import cookiecutter
 
 from charm_runner.db import DB
 from charm_runner.project import Project
@@ -88,7 +91,8 @@ class App:
         )
         self.button_frame.grid(column=1, row=0, sticky=tkinter.N)
         self.buttons = []
-        self.create_button("Add folder", self.add_project)
+        self.create_button("Add project", self.add_project)
+        self.create_button("Create project", self.create_project)
         self.create_button("Delete", self.delete_from_db)
         self.create_button("Run", self.run_in_pycharm)
         self.create_button("Exit", self.main.destroy)
@@ -131,7 +135,27 @@ class App:
         directory = filedialog.askdirectory(initialdir="~/Projects")
         if isinstance(directory, str):
             project = Project(
-                name=directory.split("/")[-1],
+                name=Path(directory).name,
+                path=directory,
+                last_opened=datetime.datetime.now(),
+            )
+            self.db.add_project(project)
+            self.update_listbox()
+
+    def create_project(self):
+        directory = filedialog.askdirectory(initialdir="~/Projects")
+        if isinstance(directory, str):
+            dir_path = Path(directory)
+            project_name = dir_path.name
+            output_dir = str(dir_path.parent.absolute())
+            cookiecutter(
+                "https://github.com/roman-right/py-template",
+                no_input=True,
+                output_dir=output_dir,
+                extra_context={"project_name": project_name},
+            )
+            project = Project(
+                name=project_name,
                 path=directory,
                 last_opened=datetime.datetime.now(),
             )
