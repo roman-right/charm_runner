@@ -13,3 +13,6 @@ if CONFIG_PATH.is_file():
 
 IDE_COMMANDS = config_src.get("IDE_COMMANDS", ["pycharm"])
 PROJECTS_PATH = Path(config_src.get("PROJECTS_PATH", Path.home() / "Projects"))
+COOKIECUTTER = config_src.get(
+    "COOKIECUTTER", "https://github.com/roman-right/py-template"
+)

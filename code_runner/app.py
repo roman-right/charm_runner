@@ -9,7 +9,7 @@ from typing import Callable, List
 
 from cookiecutter.main import cookiecutter
 
-from code_runner.config import IDE_COMMANDS, PROJECTS_PATH
+from code_runner.config import IDE_COMMANDS, PROJECTS_PATH, COOKIECUTTER
 from code_runner.db import DB
 from code_runner.project import Project
 
@@ -186,7 +186,7 @@ class App:
             project_name = dir_path.name
             output_dir = dir_path.parent.absolute()
             cookiecutter(
-                "https://github.com/roman-right/py-template",
+                COOKIECUTTER,
                 no_input=True,
                 output_dir=str(output_dir),
                 extra_context={"project_name": project_name},
