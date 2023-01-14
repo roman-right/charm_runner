@@ -17,7 +17,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-charm_runner = "charm_runner.app:App.run"
+code_runner = "code_runner.app:App.run"
 
 [tool.black]
 line-length = 79
