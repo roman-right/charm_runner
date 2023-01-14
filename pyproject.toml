@@ -1,14 +1,15 @@
 [tool.poetry]
-name = "charm-runner"
+name = "code-runner"
 version = "0.1.0"
 description = ""
 authors = ["Roman <roman-right@protonmail.com>"]
 readme = "README.md"
-packages = [{ include = "charm_runner" }]
+packages = [{ include = "code_runner" }]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 cookiecutter = "^2.1.1"
+ttkbootstrap = "^1.10.0"
 
 
 [build-system]

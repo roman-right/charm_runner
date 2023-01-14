@@ -2,13 +2,15 @@ import datetime
 import sqlite3
 from typing import List
 
-from charm_runner.project import Project
+from code_runner.config import BASE_DIR, DB_PATH
+from code_runner.project import Project
 
 
 class DB:
     def __init__(self):
+        BASE_DIR.mkdir(parents=True, exist_ok=True)
         self.con = sqlite3.connect(
-            "projects.db",
+            DB_PATH,
             detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES,
         )
         q = """

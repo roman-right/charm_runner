@@ -1,3 +1,3 @@
-# PyCharm project runner
+# IDE runner
 
 ![screenshot](assets/screenshot.png)

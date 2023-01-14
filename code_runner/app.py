@@ -9,8 +9,9 @@ from typing import Callable, List
 
 from cookiecutter.main import cookiecutter
 
-from charm_runner.db import DB
-from charm_runner.project import Project
+from code_runner.config import IDE_COMMANDS, PROJECTS_PATH
+from code_runner.db import DB
+from code_runner.project import Project
 
 
 class Colors(str, Enum):
@@ -25,7 +26,7 @@ class Colors(str, Enum):
 class App:
     def __init__(self):
         self.db = DB()
-        self.projects = {}
+        self.projects = []
 
         self.main = tkinter.Tk()
         self.main.attributes("-type", "dialog")
@@ -53,7 +54,7 @@ class App:
         self.listbox = tkinter.Listbox(
             frame,
             selectmode=EXTENDED,
-            width=20,
+            # width=50,
             height=15,
             font=("Roboto", 18),
             highlightbackground=Colors.bg_listbox,
@@ -66,13 +67,21 @@ class App:
 
         self.main.bind("<Delete>", self.delete_from_db)
         self.main.bind("<Escape>", lambda e: self.main.destroy())
-        self.main.bind("<Return>", self.run_in_pycharm)
+        self.main.bind("<Return>", self.run_in_ide)
 
     def update_listbox(self):
-        self.projects = {}
+        self.projects = []
         self.listbox.delete(0, tkinter.END)
-        for i, project in enumerate(self.db.get_all_projects()):
-            self.listbox.insert(i, project.name)
+        projects = self.db.get_all_projects()
+        project_names = [p.name for p in projects]
+        len_max = 15
+        for i, project in enumerate(projects):
+            name = (
+                f"{project.name} ({project.path})"
+                if project_names.count(project.name) > 1
+                else project.name
+            )
+            self.listbox.insert(i, name)
             self.listbox.itemconfig(
                 i,
                 bg=Colors.bg_listbox
@@ -82,7 +91,10 @@ class App:
                 foreground=Colors.bg_default,
                 selectbackground=Colors.selected,
             )
-            self.projects[project.name] = project
+            self.projects.append(project)
+            if len(name) > len_max:
+                len_max = len(name)
+        self.listbox.configure(width=len_max)
 
     # BUTTONS
 
@@ -91,12 +103,36 @@ class App:
             self.main, bg=Colors.bg_default, bd=0
         )
         self.button_frame.grid(column=1, row=0, sticky=tkinter.N)
+
+        self.init_ide_menu()
+
         self.buttons = []
         self.create_button("Add", self.add_project)
         self.create_button("Create", self.create_project)
         self.create_button("Delete", self.delete_from_db)
-        self.create_button("Run", self.run_in_pycharm)
+        self.create_button("Run", self.run_in_ide)
         self.create_button("Exit", self.main.destroy)
+
+    def init_ide_menu(self):
+        values = IDE_COMMANDS
+        self.ide = tkinter.StringVar()
+        self.ide.set(values[0])
+        ide_menu = tkinter.OptionMenu(
+            self.button_frame,
+            self.ide,
+            *values,
+        )
+        ide_menu.configure(
+            bg=Colors.bg_button,
+            foreground=Colors.fg_button,
+            highlightbackground=Colors.bg_default,
+            activebackground=Colors.selected,
+            activeforeground=Colors.bg_default,
+            bd=0,
+            width=10,
+            font=("Roboto", 16),
+        )
+        ide_menu.grid(column=0, row=0)
 
     def create_button(self, text: str, command: Callable):
         button = tkinter.Button(
@@ -112,18 +148,18 @@ class App:
             font=("Roboto", 16),
             command=command,
         )
-        button.grid(column=0, row=len(self.buttons))
+        button.grid(column=0, row=len(self.buttons) + 1)
         self.buttons.append(button)
 
     # CALLS
 
-    def run_in_pycharm(self, *args):
+    def run_in_ide(self, *args):
         projects = self.get_selected_projects()
-        args = []
+        arguments = []
         for project in projects:
-            args.append(project.path)
+            arguments.append(project.path)
             self.db.update_project(project)
-        subprocess.Popen(["pycharm", *args])
+        subprocess.Popen([self.ide.get(), *arguments])
         self.main.destroy()
 
     def delete_from_db(self, *args):
@@ -133,8 +169,8 @@ class App:
         self.update_listbox()
 
     def add_project(self):
-        directory = filedialog.askdirectory(initialdir="~/Projects")
-        if isinstance(directory, str):
+        directory = filedialog.askdirectory(initialdir=PROJECTS_PATH)
+        if isinstance(directory, str) and directory:
             project = Project(
                 name=Path(directory).name,
                 path=directory,
@@ -144,7 +180,7 @@ class App:
             self.update_listbox()
 
     def create_project(self):
-        directory = filedialog.askdirectory(initialdir="~/Projects")
+        directory = filedialog.askdirectory(initialdir=PROJECTS_PATH)
         if isinstance(directory, str):
             dir_path = Path(directory)
             project_name = dir_path.name
@@ -167,10 +203,7 @@ class App:
     # HELPERS
 
     def get_selected_projects(self) -> List[Project]:
-        return [
-            self.projects[self.listbox.get(i)]
-            for i in self.listbox.curselection()
-        ]
+        return [self.projects[i] for i in self.listbox.curselection()]
 
     # RUN
 
