@@ -9,7 +9,6 @@ packages = [{ include = "code_runner" }]
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 cookiecutter = "^2.1.1"
-ttkbootstrap = "^1.10.0"
 
 
 [build-system]

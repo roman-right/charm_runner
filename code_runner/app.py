@@ -129,7 +129,7 @@ class App:
             activebackground=Colors.selected,
             activeforeground=Colors.bg_default,
             bd=0,
-            width=10,
+            width=9,
             font=("Roboto", 16),
         )
         ide_menu.grid(column=0, row=0)
