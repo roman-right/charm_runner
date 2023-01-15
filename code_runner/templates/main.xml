@@ -2,27 +2,12 @@
 <!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
-  <object class="GtkListStore" id="ide_store">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="projects_store">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name gchararray -->
-      <column type="gchararray"/>
-      <column type="gchararray"/>
-    </columns>
-  </object>
   <object class="GtkFileChooserDialog" id="choose_dir">
     <property name="can-focus">False</property>
     <property name="can-default">True</property>
+    <property name="title">Select directory</property>
     <property name="type-hint">dialog</property>
     <property name="action">select-folder</property>
-    <property name="title">Select directory</property>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can-focus">False</property>
@@ -74,10 +59,26 @@
       <action-widget response="-1">cancel_choose_dir</action-widget>
     </action-widgets>
   </object>
+  <object class="GtkListStore" id="ide_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="projects_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name gchararray -->
+      <column type="gchararray"/>
+      <!-- column-name gchararray1 -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkWindow" id="main">
     <property name="can-focus">False</property>
-    <property name="type-hint">dialog</property>
     <property name="title">Code Runner</property>
+    <property name="type-hint">dialog</property>
     <child>
       <object class="GtkPaned">
         <property name="visible">True</property>
@@ -94,8 +95,8 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="model">projects_store</property>
-                <property name="reorderable">True</property>
-                <property name="enable-grid-lines">horizontal</property>
+                <property name="enable-grid-lines">both</property>
+                <signal name="row-activated" handler="run_projects" swapped="no"/>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection" id="projects_view_selection">
                     <property name="mode">multiple</property>
