@@ -1,6 +1,6 @@
 import datetime
 import sqlite3
-from typing import List
+from typing import Dict
 
 from code_runner.config import BASE_DIR, DB_PATH
 from code_runner.project import Project
@@ -57,13 +57,13 @@ class DB:
         self.cur.execute(q, (project.path,))
         self.con.commit()
 
-    def get_all_projects(self) -> List[Project]:
+    def get_all_projects(self) -> Dict[str, Project]:
         q = """
             SELECT * FROM projects ORDER BY name COLLATE NOCASE ASC;
             """
         self.cur.execute(q)
         data = self.cur.fetchall()
-        res = []
+        res = {}
         for i in data:
-            res.append(Project(name=i[0], path=i[1], last_opened=i[2]))
+            res[i[1]] = Project(name=i[0], path=i[1], last_opened=i[2])
         return res
