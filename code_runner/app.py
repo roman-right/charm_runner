@@ -114,6 +114,11 @@ class Handler:
     def exit(self, *args):
         Gtk.main_quit()
 
+    # KEY PRESS
+
+    def key_press(self, *args):
+        print(args)
+
     # COMMON
 
     def get_selected_projects(self) -> List[Project]:
