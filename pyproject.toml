@@ -7,8 +7,9 @@ readme = "README.md"
 packages = [{ include = "code_runner" }]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4.0"
+python = ">=3.10,<3.12"
 cookiecutter = "^2.1.1"
+pyside6 = "^6.5.0"
 
 
 [build-system]
