@@ -4,6 +4,7 @@ import venv
 from datetime import datetime
 from pathlib import Path
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
@@ -184,6 +185,10 @@ class ProjectManager(QDialog):
 
         # Add double click event
         table.doubleClicked.connect(self.run_projects)
+
+        # Add enter key event (for running projects)
+        table.keyPressEvent = self.run_projects_on_enter
+
         return table
 
     def rerender_table(self):
@@ -271,6 +276,11 @@ class ProjectManager(QDialog):
 
         add_dialog.layout().addWidget(add_button)
 
+        # Add Cancel button
+        cancel_button = QPushButton("Cancel")
+        cancel_button.clicked.connect(add_dialog.reject)
+        add_dialog.layout().addWidget(cancel_button)
+
         add_dialog.exec()
 
         self.rerender_table()
@@ -342,7 +352,12 @@ class ProjectManager(QDialog):
 
         create_dialog.layout().addWidget(create_button)
 
-        create_dialog.exec_()
+        # Add Cancel button
+        cancel_button = QPushButton("Cancel")
+        cancel_button.clicked.connect(create_dialog.reject)
+        create_dialog.layout().addWidget(cancel_button)
+
+        create_dialog.exec()
 
         self.rerender_table()
 
@@ -411,7 +426,12 @@ class ProjectManager(QDialog):
 
         save_button.clicked.connect(save_changes)
 
-        edit_dialog.exec_()
+        # Add Cancel button
+        cancel_button = QPushButton("Cancel")
+        cancel_button.clicked.connect(edit_dialog.reject)
+        edit_dialog.layout().addWidget(cancel_button)
+
+        edit_dialog.exec()
 
         self.rerender_table()
 
@@ -424,6 +444,12 @@ class ProjectManager(QDialog):
                 Category(id=None, name=category_name)
             )
             self.rerender_categories()
+
+    # Event handlers
+
+    def run_projects_on_enter(self, event):
+        if event.key() == Qt.Key_Return:
+            self.run_projects()
 
     # Button press handlers
 
@@ -458,6 +484,8 @@ def run():
     QWidget {
         font-family: "Roboto";
         font-size: 24px;
+        background-color: #2d2d2d;
+        color: #cccccc;
     }
     """
     )
