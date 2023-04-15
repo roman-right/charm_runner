@@ -7,6 +7,7 @@ from typing import Optional
 class Category:
     id: Optional[int]
     name: str
+    is_active: bool = True
 
 
 @dataclass

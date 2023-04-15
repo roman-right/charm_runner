@@ -18,7 +18,8 @@ class DB:
             CREATE TABLE IF NOT EXISTS
                 categories (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name VARCHAR UNIQUE
+                    name VARCHAR UNIQUE,
+                    is_active BOOLEAN DEFAULT 0
                 );
             """
 
@@ -67,6 +68,17 @@ class DB:
             self.con.commit()
             category.id = self.cur.lastrowid
         return category
+
+    def set_category_active(self, category: Category):
+        q_set_all_categories_to_not_active = """
+            UPDATE categories SET is_active = 0;
+            """
+        q_set_current_category_to_active = """
+            UPDATE categories SET is_active = 1 WHERE id = ?;
+            """
+        self.cur.execute(q_set_all_categories_to_not_active)
+        self.cur.execute(q_set_current_category_to_active, (category.id,))
+        self.con.commit()
 
     def add_project(self, project: Project):
         category_id = self.add_category_if_not_exists(project.category).id
@@ -134,12 +146,14 @@ class DB:
         self.cur.execute(q, (category.id,))
         self.con.commit()
 
-    def get_category_by_name(self, category_name: str) -> Category:
+    def get_category_by_name(self, category_name: str) -> Optional[Category]:
         q = """ 
             SELECT * FROM categories WHERE name = ?;
             """
         self.cur.execute(q, (category_name,))
         data = self.cur.fetchone()
+        if not data:
+            return None
         return Category(id=data[0], name=data[1])
 
     def get_category_by_id(self, category_id: int) -> Category:
@@ -185,5 +199,13 @@ class DB:
         data = self.cur.fetchall()
         res = []
         for i in data:
-            res.append(Category(id=i[0], name=i[1]))
+            res.append(Category(id=i[0], name=i[1], is_active=i[2]))
         return res
+
+    def get_active_category(self) -> Category:
+        q = """
+            SELECT * FROM categories WHERE is_active = 1;
+            """
+        self.cur.execute(q)
+        data = self.cur.fetchone()
+        return Category(id=data[0], name=data[1], is_active=data[2])

@@ -46,6 +46,9 @@ class ProjectManager(QDialog):
         self.render_left_section()
         self.render_right_section()
 
+        # add on close event
+        self.finished.connect(self.on_close)
+
         self.rerender_table()
 
     # HELPERS
@@ -154,7 +157,6 @@ class ProjectManager(QDialog):
     def render_category(self, name):
         table = self.create_table()
         self.tabs.addTab(table, name)
-        self.rerender_table()
 
     def update_categories(self):
         self.categories = self.db.get_all_categories()
@@ -162,8 +164,18 @@ class ProjectManager(QDialog):
     def rerender_categories(self):
         self.tabs.clear()
         self.update_categories()
+
         for category in self.categories:
             self.render_category(category.name)
+
+        self.rerender_table()
+
+        # select active category if there is one
+        self.update_categories()
+        if self.db.get_active_category():
+            self.tabs.setCurrentIndex(
+                self.categories.index(self.db.get_active_category())
+            )
 
     def create_table(self):
         table = QTableWidget(0, 3)
@@ -215,6 +227,7 @@ class ProjectManager(QDialog):
                 for col, data in enumerate(data_row):
                     selected_table.setItem(row, col, QTableWidgetItem(data))
 
+    # DIALOGS
     def show_add_project_dialog(self):
         add_dialog = QDialog(self)
         add_dialog.setWindowTitle("Add Project")
@@ -450,6 +463,13 @@ class ProjectManager(QDialog):
     def run_projects_on_enter(self, event):
         if event.key() == Qt.Key_Return:
             self.run_projects()
+
+    def on_close(self, event):
+        # make current category active
+        current_category = self.db.get_category_by_name(
+            self.get_current_tab_name()
+        )
+        self.db.set_category_active(current_category)
 
     # Button press handlers
 
