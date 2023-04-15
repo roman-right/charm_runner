@@ -501,13 +501,11 @@ def run():
     # app.setStyleSheet(open("style.qss").read())
     app.setStyleSheet(
         """
-    QWidget {
-        font-family: "Roboto";
-        font-size: 24px;
-        background-color: #2d2d2d;
-        color: #cccccc;
-    }
-    """
+        QWidget {
+            font-family: "Roboto";
+            font-size: 24px;
+        }
+        """
     )
     project_manager = ProjectManager()
     project_manager.show()
