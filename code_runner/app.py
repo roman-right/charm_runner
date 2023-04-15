@@ -4,6 +4,7 @@ import venv
 from datetime import datetime
 from pathlib import Path
 
+from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QApplication,
@@ -25,9 +26,10 @@ from PySide6.QtWidgets import (
 )
 from cookiecutter.main import cookiecutter
 
+from code_runner.category import Category
 from code_runner.config import IDE_COMMANDS, COOKIECUTTER, PROJECTS_PATH
 from code_runner.db import DB
-from code_runner.project import Project, Category
+from code_runner.project import Project
 
 
 class ProjectManager(QDialog):
@@ -35,8 +37,7 @@ class ProjectManager(QDialog):
         super().__init__()
 
         self.db = DB()
-        self.projects = {}
-        self.categories = []
+        Category.create_default_if_db_is_empty(self.db)
 
         self.table_headers = ["Name", "Path", "Days from last opened"]
 
@@ -87,7 +88,7 @@ class ProjectManager(QDialog):
         return projects
 
     def update_categories(self):
-        self.categories = self.db.get_all_categories()
+        self.categories = Category.all(self.db)
 
     # RENDERS
 
@@ -146,7 +147,7 @@ class ProjectManager(QDialog):
     def render_category_buttons(self):
         self.right_layout.addWidget(QLabel("Categories"))
         self.add_button(
-            "Add", self.show_add_category_dialog, self.right_layout
+            "Create", self.show_create_category_dialog, self.right_layout
         )
         self.add_button("Delete", self.delete_category, self.right_layout)
 
@@ -172,23 +173,21 @@ class ProjectManager(QDialog):
 
         # select active category if there is one
         self.update_categories()
-        if self.db.get_active_category():
-            self.tabs.setCurrentIndex(
-                self.categories.index(self.db.get_active_category())
-            )
+        active_category = Category.get_active(self.db)
+        if active_category:
+            self.tabs.setCurrentIndex(self.categories.index(active_category))
 
     def create_table(self):
         table = QTableWidget(0, 3)
         table.setHorizontalHeaderLabels(self.table_headers)
         table.setSelectionBehavior(QAbstractItemView.SelectRows)
         table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeToContents
+            QtWidgets.QHeaderView.Stretch
         )
+
+        # Make the path column as big as content
         table.horizontalHeader().setSectionResizeMode(
             1, QHeaderView.ResizeToContents
-        )
-        table.horizontalHeader().setSectionResizeMode(
-            2, QHeaderView.ResizeToContents
         )
         table.verticalHeader().setVisible(False)
 
@@ -207,25 +206,33 @@ class ProjectManager(QDialog):
         selected_table = self.tabs.currentWidget()
         if selected_table is not None:
             selected_table.clear()
-
-            projects = self.db.get_all_projects(
-                category_name=self.get_current_tab_name()
+            category = Category.get_by_name(
+                self.db, self.get_current_tab_name()
             )
+            if category:
+                projects = Project.all_by_category(
+                    self.db,
+                    category=Category.get_by_name(
+                        self.db, self.get_current_tab_name()
+                    ),
+                )
 
-            updated_data = [
-                [
-                    project.name,
-                    project.path,
-                    str((datetime.now() - project.last_opened).days),
+                updated_data = [
+                    [
+                        project.name,
+                        project.path,
+                        str((datetime.now() - project.last_opened).days),
+                    ]
+                    for project in projects
                 ]
-                for project in projects.values()
-            ]
 
-            selected_table.setRowCount(len(updated_data))
-            selected_table.setHorizontalHeaderLabels(self.table_headers)
-            for row, data_row in enumerate(updated_data):
-                for col, data in enumerate(data_row):
-                    selected_table.setItem(row, col, QTableWidgetItem(data))
+                selected_table.setRowCount(len(updated_data))
+                selected_table.setHorizontalHeaderLabels(self.table_headers)
+                for row, data_row in enumerate(updated_data):
+                    for col, data in enumerate(data_row):
+                        selected_table.setItem(
+                            row, col, QTableWidgetItem(data)
+                        )
 
     # DIALOGS
     def show_add_project_dialog(self):
@@ -257,7 +264,7 @@ class ProjectManager(QDialog):
         category_label = QLabel("Category:")
         category_combo = QComboBox()
 
-        categories = self.db.get_all_categories()
+        categories = Category.all(self.db)
 
         for category in categories:
             category_combo.addItem(category.name)
@@ -282,7 +289,7 @@ class ProjectManager(QDialog):
                 last_opened=datetime.now(),
                 category=category,
             )
-            self.db.add_project(project)
+            project.save(self.db)
             add_dialog.accept()
 
         add_button.clicked.connect(add_project)
@@ -327,7 +334,7 @@ class ProjectManager(QDialog):
         category_label = QLabel("Category:")
         category_combo = QComboBox()
 
-        categories = self.db.get_all_categories()
+        categories = Category.all(self.db)
 
         for category in categories:
             category_combo.addItem(category.name)
@@ -358,7 +365,7 @@ class ProjectManager(QDialog):
                 last_opened=datetime.now(),
                 category=category,
             )
-            self.db.add_project(project)
+            project.save(self.db)
             create_dialog.accept()
 
         create_button.clicked.connect(create_project)
@@ -433,7 +440,7 @@ class ProjectManager(QDialog):
                 last_opened=datetime.now(),
                 category=Category(id=None, name=category_combo.currentText()),
             )
-            self.db.update_project(project)
+            project.save(self.db)
 
             edit_dialog.close()
 
@@ -448,15 +455,17 @@ class ProjectManager(QDialog):
 
         self.rerender_table()
 
-    def show_add_category_dialog(self):
+    def show_create_category_dialog(self):
         category_name, ok = QInputDialog.getText(
-            self, "Add Category", "Category Name:"
+            self, "Create Category", "Category Name:"
         )
         if ok:
-            self.db.add_category_if_not_exists(
-                Category(id=None, name=category_name)
-            )
+            category = Category(id=None, name=category_name)
+            category.save(self.db)
             self.rerender_categories()
+
+            # Select newly created category
+            self.tabs.setCurrentIndex(self.categories.index(category))
 
     # Event handlers
 
@@ -466,17 +475,19 @@ class ProjectManager(QDialog):
 
     def on_close(self, event):
         # make current category active
-        current_category = self.db.get_category_by_name(
-            self.get_current_tab_name()
+        current_category = Category.get_by_name(
+            self.db, self.get_current_tab_name()
         )
-        self.db.set_category_active(current_category)
+        current_category.set_active(self.db)
+
+        self.db.close()
 
     # Button press handlers
 
     def delete_category(self):
         category_name = self.get_current_tab_name()
-        category = self.db.get_category_by_name(category_name)
-        self.db.delete_category_and_all_projects(category)
+        category = Category.get_by_name(self.db, category_name)
+        category.delete(self.db)
         self.rerender_categories()
 
     def run_projects(self):
@@ -484,7 +495,7 @@ class ProjectManager(QDialog):
         arguments = []
         for project in projects:
             arguments.append(project.path)
-            self.db.update_project(project)
+            project.save(self.db)
         selected_ide = self.ide_selector.currentText()
         subprocess.Popen([selected_ide, *arguments])
         self.close()
@@ -492,7 +503,7 @@ class ProjectManager(QDialog):
     def delete_projects(self):
         projects = self.get_selected_projects()
         for project in projects:
-            self.db.delete_project(project)
+            project.delete(self.db)
         self.rerender_table()
 
 
