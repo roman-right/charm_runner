@@ -86,6 +86,9 @@ class ProjectManager(QDialog):
             projects.append(project)
         return projects
 
+    def update_categories(self):
+        self.categories = self.db.get_all_categories()
+
     # RENDERS
 
     def render_left_section(self):
@@ -157,9 +160,6 @@ class ProjectManager(QDialog):
     def render_category(self, name):
         table = self.create_table()
         self.tabs.addTab(table, name)
-
-    def update_categories(self):
-        self.categories = self.db.get_all_categories()
 
     def rerender_categories(self):
         self.tabs.clear()
