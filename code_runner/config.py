@@ -12,7 +12,9 @@ if CONFIG_PATH.is_file():
         config_src = yaml.safe_load(f.read())
 
 IDE_COMMANDS = config_src.get("IDE_COMMANDS", ["pycharm"])
-PROJECTS_PATH = Path(config_src.get("PROJECTS_PATH", Path.home() / "Projects"))
+PROJECTS_PATH = str(
+    Path(config_src.get("PROJECTS_PATH", Path.home() / "Projects"))
+)
 COOKIECUTTER = config_src.get(
     "COOKIECUTTER", "https://github.com/roman-right/py-template"
 )

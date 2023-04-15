@@ -25,7 +25,7 @@ from PySide6.QtWidgets import (
 )
 from cookiecutter.main import cookiecutter
 
-from code_runner.config import IDE_COMMANDS, COOKIECUTTER
+from code_runner.config import IDE_COMMANDS, COOKIECUTTER, PROJECTS_PATH
 from code_runner.db import DB
 from code_runner.project import Project, Category
 
@@ -248,7 +248,7 @@ class ProjectManager(QDialog):
 
         def browse_directory():
             directory = QFileDialog.getExistingDirectory(
-                self, "Select Project Directory", "/home/ro/Projects"
+                self, "Select Project Directory", PROJECTS_PATH
             )
             project_path_edit.setText(directory)
 
@@ -318,7 +318,7 @@ class ProjectManager(QDialog):
 
         def browse_directory():
             directory = QFileDialog.getExistingDirectory(
-                self, "Select Project Directory", "/home/ro/Projects"
+                self, "Select Project Directory", PROJECTS_PATH
             )
             project_path_edit.setText(directory)
 
@@ -405,7 +405,7 @@ class ProjectManager(QDialog):
 
         def browse_directory():
             directory = QFileDialog.getExistingDirectory(
-                self, "Select Project Directory", "/home/ro/Projects"
+                self, "Select Project Directory", PROJECTS_PATH
             )
             project_path_edit.setText(directory)
 
