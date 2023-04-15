@@ -8,7 +8,6 @@ from code_runner.project import Project, Category
 class DB:
     def __init__(self):
         BASE_DIR.mkdir(parents=True, exist_ok=True)
-        print(DB_PATH)
         self.con = sqlite3.connect(
             DB_PATH,
             detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES,

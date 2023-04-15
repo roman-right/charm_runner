@@ -42,53 +42,9 @@ class ProjectManager(QDialog):
         self.setWindowTitle("Project Manager")
         self.setLayout(QHBoxLayout())
 
-        # Left section - Tabs for project categories
-        wrapper = QWidget()
-        wrapper.setFixedWidth(1200)
-        left_layout = QVBoxLayout()
-        self.tabs = QTabWidget()
-        self.tabs.currentChanged.connect(self.rerender_table)
-        left_layout.addWidget(self.tabs)
-        wrapper.setLayout(left_layout)
-        self.layout().addWidget(wrapper)
+        self.render_left_section()
+        self.render_right_section()
 
-        # Add example categories
-        self.rerender_categories()
-
-        # Right section - Controls (IDE selector, buttons)
-        right_layout = QVBoxLayout()
-
-        self.ide_selector = QComboBox()
-        for ide_command in IDE_COMMANDS:
-            self.ide_selector.addItem(ide_command)
-        right_layout.addWidget(self.ide_selector)
-
-        # add seperator
-        right_layout.addWidget(QLabel("Categories"))
-        self.add_button("Add", self.show_add_category_dialog, right_layout)
-        self.add_button("Delete", self.delete_category, right_layout)
-
-        # add seperator
-        right_layout.addWidget(QLabel("Projects"))
-
-        self.add_button("Add", self.show_add_project_dialog, right_layout)
-        self.add_button(
-            "Edit", self.show_edit_project_dialog, parent_layout=right_layout
-        )
-        self.add_button(
-            "Create",
-            self.show_create_project_dialog,
-            parent_layout=right_layout,
-        )
-        self.add_button(
-            "Delete", self.delete_projects, parent_layout=right_layout
-        )
-        self.add_button("Run", self.run_projects, parent_layout=right_layout)
-        self.add_button("Exit", self.close, right_layout)
-
-        self.layout().addLayout(right_layout)
-
-        # self.update_project_list()
         self.rerender_table()
 
     # HELPERS
@@ -127,6 +83,72 @@ class ProjectManager(QDialog):
         return projects
 
     # RENDERS
+
+    def render_left_section(self):
+        # Left section - Tabs for project categories
+        wrapper = QWidget()
+        wrapper.setFixedWidth(1200)
+        self.left_layout = QVBoxLayout()
+        self.tabs = QTabWidget()
+        self.tabs.currentChanged.connect(self.rerender_table)
+        self.left_layout.addWidget(self.tabs)
+        wrapper.setLayout(self.left_layout)
+        self.layout().addWidget(wrapper)
+
+        self.rerender_categories()
+
+    def render_right_section(self):
+        # Right section - Controls (IDE selector, buttons)
+        self.right_layout = QVBoxLayout()
+        self.render_ide_selector()
+        self.render_projects_buttons()
+        self.render_category_buttons()
+        self.render_separator()
+
+        self.add_button("Exit", self.close, self.right_layout)
+
+        self.layout().addLayout(self.right_layout)
+
+    def render_ide_selector(self):
+        self.ide_selector = QComboBox()
+        for ide_command in IDE_COMMANDS:
+            self.ide_selector.addItem(ide_command)
+        self.right_layout.addWidget(self.ide_selector)
+
+    def render_projects_buttons(self):
+        self.right_layout.addWidget(QLabel("Projects"))
+
+        self.add_button("Add", self.show_add_project_dialog, self.right_layout)
+        self.add_button(
+            "Edit",
+            self.show_edit_project_dialog,
+            parent_layout=self.right_layout,
+        )
+        self.add_button(
+            "Create",
+            self.show_create_project_dialog,
+            parent_layout=self.right_layout,
+        )
+        self.add_button(
+            "Delete", self.delete_projects, parent_layout=self.right_layout
+        )
+        self.add_button(
+            "Run", self.run_projects, parent_layout=self.right_layout
+        )
+
+    def render_category_buttons(self):
+        self.right_layout.addWidget(QLabel("Categories"))
+        self.add_button(
+            "Add", self.show_add_category_dialog, self.right_layout
+        )
+        self.add_button("Delete", self.delete_category, self.right_layout)
+
+    def render_separator(self):
+        # Add line to separate buttons
+        line = QLabel()
+        line.setFrameShape(QLabel.HLine)
+        line.setFrameShadow(QLabel.Sunken)
+        self.right_layout.addWidget(line)
 
     def render_category(self, name):
         table = self.create_table()
@@ -193,11 +215,6 @@ class ProjectManager(QDialog):
         add_dialog.setWindowTitle("Add Project")
         add_dialog.setLayout(QVBoxLayout())
 
-        project_name_label = QLabel("Project Name:")
-        project_name_edit = QLineEdit()
-        add_dialog.layout().addWidget(project_name_label)
-        add_dialog.layout().addWidget(project_name_edit)
-
         project_path_label = QLabel("Project Path:")
         project_path_edit = QLineEdit()
         add_dialog.layout().addWidget(project_path_label)
@@ -205,6 +222,11 @@ class ProjectManager(QDialog):
 
         browse_button = QPushButton("Browse")
         add_dialog.layout().addWidget(browse_button)
+
+        project_name_label = QLabel("Project Name:")
+        project_name_edit = QLineEdit()
+        add_dialog.layout().addWidget(project_name_label)
+        add_dialog.layout().addWidget(project_name_edit)
 
         def browse_directory():
             directory = QFileDialog.getExistingDirectory(
@@ -249,7 +271,7 @@ class ProjectManager(QDialog):
 
         add_dialog.layout().addWidget(add_button)
 
-        add_dialog.exec_()
+        add_dialog.exec()
 
         self.rerender_table()
 
@@ -258,11 +280,6 @@ class ProjectManager(QDialog):
         create_dialog.setWindowTitle("Create Project")
         create_dialog.setLayout(QVBoxLayout())
 
-        project_name_label = QLabel("Project Name:")
-        project_name_edit = QLineEdit()
-        create_dialog.layout().addWidget(project_name_label)
-        create_dialog.layout().addWidget(project_name_edit)
-
         project_path_label = QLabel("Project Path:")
         project_path_edit = QLineEdit()
         create_dialog.layout().addWidget(project_path_label)
@@ -270,6 +287,11 @@ class ProjectManager(QDialog):
 
         browse_button = QPushButton("Browse")
         create_dialog.layout().addWidget(browse_button)
+
+        project_name_label = QLabel("Project Name:")
+        project_name_edit = QLineEdit()
+        create_dialog.layout().addWidget(project_name_label)
+        create_dialog.layout().addWidget(project_name_edit)
 
         def browse_directory():
             directory = QFileDialog.getExistingDirectory(
@@ -294,17 +316,21 @@ class ProjectManager(QDialog):
 
         def create_project():
             path = Path(project_path_edit.text())
+            project_name = (
+                project_name_edit.text()
+                or project_path_edit.text().split("/")[-1]
+            )
             cookiecutter(
                 COOKIECUTTER,
                 no_input=True,
                 output_dir=str(project_path_edit.text()),
-                extra_context={"project_name": project_name_edit.text()},
+                extra_context={"project_name": project_name},
                 overwrite_if_exists=True,
             )
             venv.create(path.absolute() / "venv", with_pip=True)
             category = Category(id=None, name=category_combo.currentText())
             project = Project(
-                name=project_name_edit.text(),
+                name=project_name,
                 path=str(path.absolute()),
                 last_opened=datetime.now(),
                 category=category,
