@@ -26,10 +26,10 @@ from PySide6.QtWidgets import (
 )
 from cookiecutter.main import cookiecutter
 
-from code_runner.category import Category
-from code_runner.config import IDE_COMMANDS, COOKIECUTTER, PROJECTS_PATH
-from code_runner.db import DB
-from code_runner.project import Project
+from code_compass.category import Category
+from code_compass.config import IDE_COMMANDS, COOKIECUTTER, PROJECTS_PATH
+from code_compass.db import DB
+from code_compass.project import Project
 
 
 class ProjectManager(QDialog):
@@ -39,9 +39,9 @@ class ProjectManager(QDialog):
         self.db = DB()
         Category.create_default_if_db_is_empty(self.db)
 
-        self.table_headers = ["Name", "Path", "Days from last opened"]
+        self.table_headers = ["Name", "Path", "Days Since Last Access"]
 
-        self.setWindowTitle("Project Manager")
+        self.setWindowTitle("Code Compass")
         self.setLayout(QHBoxLayout())
 
         self.render_left_section()
@@ -280,8 +280,7 @@ class ProjectManager(QDialog):
         def add_project():
             category = Category(id=None, name=category_combo.currentText())
             project_name = (
-                project_name_edit.text()
-                or project_path_edit.text().split("/")[-1]
+                project_name_edit.text() or Path(project_path_edit.text()).name
             )
             project = Project(
                 name=project_name,
@@ -346,10 +345,7 @@ class ProjectManager(QDialog):
 
         def create_project():
             path = Path(project_path_edit.text())
-            project_name = (
-                project_name_edit.text()
-                or project_path_edit.text().split("/")[-1]
-            )
+            project_name = project_name_edit.text() or path.name
             cookiecutter(
                 COOKIECUTTER,
                 no_input=True,
@@ -509,7 +505,6 @@ class ProjectManager(QDialog):
 
 def run():
     app = QApplication(sys.argv)
-    # app.setStyleSheet(open("style.qss").read())
     app.setStyleSheet(
         """
         QWidget {

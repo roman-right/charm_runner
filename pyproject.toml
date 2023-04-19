@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "code-runner"
+name = "code-compass"
 version = "0.1.0"
 description = ""
 authors = ["Roman <roman-right@protonmail.com>"]
 readme = "README.md"
-packages = [{ include = "code_runner" }]
+packages = [{ include = "code_compass" }]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
@@ -17,7 +17,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-code_runner = "code_runner.app:run"
+code-compass = "code_compass.app:run"
 
 [tool.black]
 line-length = 79

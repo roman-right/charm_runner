@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional, List
 
-from code_runner.db import DB
+from code_compass.db import DB
 
 
 @dataclass

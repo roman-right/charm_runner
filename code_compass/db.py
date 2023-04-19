@@ -1,6 +1,6 @@
 import sqlite3
 
-from code_runner.config import BASE_DIR, DB_PATH
+from code_compass.config import BASE_DIR, DB_PATH
 
 
 class DB:
