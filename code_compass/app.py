@@ -54,7 +54,7 @@ class ProjectManager(QDialog):
         self.table_headers = ["Name", "Path", "Days Since Last Access"]
 
         # Initialize the main window
-        self.setWindowTitle(f"Code Compass {self.font_size}")
+        self.setWindowTitle("Code Compass")
         self.setLayout(QHBoxLayout())
 
         # Render sections
