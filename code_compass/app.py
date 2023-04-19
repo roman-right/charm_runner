@@ -6,6 +6,7 @@ from pathlib import Path
 
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QCursor, QGuiApplication
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
@@ -36,20 +37,34 @@ class ProjectManager(QDialog):
     def __init__(self):
         super().__init__()
 
+        # Calculate the width based on the current screen resolution
+        cursor_position = QCursor.pos()
+        current_screen = QGuiApplication.screenAt(cursor_position)
+        self.screen_resolution = current_screen.size()
+
+        self.font_size = (
+            self.screen_resolution.width() + self.screen_resolution.height()
+        ) // 250
+
+        # Initialize the database
         self.db = DB()
         Category.create_default_if_db_is_empty(self.db)
 
+        # Set the table headers
         self.table_headers = ["Name", "Path", "Days Since Last Access"]
 
-        self.setWindowTitle("Code Compass")
+        # Initialize the main window
+        self.setWindowTitle(f"Code Compass {self.font_size}")
         self.setLayout(QHBoxLayout())
 
+        # Render sections
         self.render_left_section()
         self.render_right_section()
 
         # add on close event
         self.finished.connect(self.on_close)
 
+        # Render the data
         self.rerender_table()
 
     # HELPERS
@@ -95,7 +110,10 @@ class ProjectManager(QDialog):
     def render_left_section(self):
         # Left section - Tabs for project categories
         wrapper = QWidget()
-        wrapper.setFixedWidth(1200)
+
+        wrapper_width = self.screen_resolution.width() // 3
+        wrapper.setFixedWidth(wrapper_width)
+
         self.left_layout = QVBoxLayout()
         self.tabs = QTabWidget()
         self.tabs.currentChanged.connect(self.rerender_table)
@@ -505,15 +523,16 @@ class ProjectManager(QDialog):
 
 def run():
     app = QApplication(sys.argv)
+    project_manager = ProjectManager()
     app.setStyleSheet(
-        """
-        QWidget {
+        f"""
+        QWidget {{
             font-family: "Roboto";
-            font-size: 24px;
-        }
+            font-size: {project_manager.font_size}px;
+        }}
         """
     )
-    project_manager = ProjectManager()
+
     project_manager.show()
     sys.exit(app.exec())
 
