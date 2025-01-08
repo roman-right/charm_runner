@@ -367,7 +367,7 @@ class ProjectManager(QDialog):
             cookiecutter(
                 COOKIECUTTER,
                 no_input=True,
-                output_dir=str(project_path_edit.text()),
+                output_dir=str(path.absolute().parent),
                 extra_context={"project_name": project_name},
                 overwrite_if_exists=True,
             )
